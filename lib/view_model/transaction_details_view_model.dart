@@ -75,6 +75,9 @@ abstract class TransactionDetailsViewModelBase with Store {
       case WalletType.tron:
         _addTronListItems(tx, dateFormat);
         break;
+      case WalletType.zano:
+        _addZanoListItems(tx, dateFormat);
+        break;
       default:
         break;
     }
@@ -166,6 +169,8 @@ abstract class TransactionDetailsViewModelBase with Store {
         return 'https://solscan.io/tx/${txId}';
       case WalletType.tron:
         return 'https://tronscan.org/#/transaction/${txId}';
+      case WalletType.zano:
+        return 'https://testnet-explorer.zano.org/transaction/${txId}';
       default:
         return '';
     }
@@ -194,6 +199,8 @@ abstract class TransactionDetailsViewModelBase with Store {
         return S.current.view_transaction_on + 'solscan.io';
       case WalletType.tron:
         return S.current.view_transaction_on + 'tronscan.org';
+      case WalletType.zano:
+        return S.current.view_transaction_on + 'explorer.zano.org';
       default:
         return '';
     }
@@ -406,6 +413,21 @@ abstract class TransactionDetailsViewModelBase with Store {
     items.addAll(_items);
   }
 
+  void _addZanoListItems(TransactionInfo tx, DateFormat dateFormat) {
+    final comment = tx.additionalInfo['comment'] as String?;
+    items.addAll([
+      StandartListItem(title: S.current.transaction_details_transaction_id, value: tx.id),
+      StandartListItem(
+          title: S.current.transaction_details_date, value: dateFormat.format(tx.date)),
+      StandartListItem(title: S.current.transaction_details_height, value: '${tx.height}'),
+      StandartListItem(title: S.current.transaction_details_amount, value: tx.amountFormatted()),
+      if (tx.feeFormatted()?.isNotEmpty ?? false)
+        StandartListItem(title: S.current.transaction_details_fee, value: tx.feeFormatted()!),
+      if (comment != null)
+        StandartListItem(title: S.current.transaction_details_title, value: comment),
+    ]);
+  }
+
   @action
   Future<void> _checkForRBF() async {
     if (wallet.type == WalletType.bitcoin &&
@@ -439,4 +461,5 @@ abstract class TransactionDetailsViewModelBase with Store {
   String get pendingTransactionFeeFiatAmountFormatted => sendViewModel.isFiatDisabled
       ? ''
       : sendViewModel.pendingTransactionFeeFiatAmount + ' ' + sendViewModel.fiat.title;
+
 }

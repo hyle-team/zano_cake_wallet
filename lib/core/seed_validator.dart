@@ -1,6 +1,7 @@
 import 'package:cake_wallet/bitcoin/bitcoin.dart';
 import 'package:cake_wallet/ethereum/ethereum.dart';
 import 'package:cake_wallet/haven/haven.dart';
+import 'package:cake_wallet/zano/zano.dart';
 import 'package:cake_wallet/core/validator.dart';
 import 'package:cake_wallet/entities/mnemonic_item.dart';
 import 'package:cake_wallet/polygon/polygon.dart';
@@ -20,7 +21,8 @@ class SeedValidator extends Validator<MnemonicItem> {
   final String language;
   final List<String> _words;
 
-  static List<String> getWordList({required WalletType type, required String language}) {
+  static List<String> getWordList(
+      {required WalletType type, required String language}) {
     switch (type) {
       case WalletType.bitcoin:
         return getBitcoinWordList(language);
@@ -43,6 +45,8 @@ class SeedValidator extends Validator<MnemonicItem> {
         return solana!.getSolanaWordList(language);
         case WalletType.tron:
         return tron!.getTronWordList(language);
+      case WalletType.zano:
+        return zano!.getWordList(language);
       default:
         return [];
     }

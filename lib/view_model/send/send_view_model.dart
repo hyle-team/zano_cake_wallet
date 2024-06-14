@@ -17,6 +17,7 @@ import 'package:cake_wallet/view_model/contact_list/contact_list_view_model.dart
 import 'package:cake_wallet/view_model/dashboard/balance_view_model.dart';
 import 'package:cake_wallet/view_model/hardware_wallet/ledger_view_model.dart';
 import 'package:cw_core/exceptions.dart';
+import 'package:cake_wallet/zano/zano.dart';
 import 'package:cw_core/transaction_priority.dart';
 import 'package:cake_wallet/view_model/send/output.dart';
 import 'package:cake_wallet/view_model/send/send_template_view_model.dart';
@@ -55,7 +56,8 @@ abstract class SendViewModelBase extends WalletChangeListenerViewModel with Stor
     selectedCryptoCurrency = wallet.currency;
     hasMultipleTokens = isEVMCompatibleChain(wallet.type) ||
         wallet.type == WalletType.solana ||
-        wallet.type == WalletType.tron;
+        wallet.type == WalletType.tron || 
+        wallet.type == WalletType.zano;
   }
 
   SendViewModelBase(
@@ -71,7 +73,8 @@ abstract class SendViewModelBase extends WalletChangeListenerViewModel with Stor
         selectedCryptoCurrency = appStore.wallet!.currency,
         hasMultipleTokens = isEVMCompatibleChain(appStore.wallet!.type) ||
             appStore.wallet!.type == WalletType.solana ||
-            appStore.wallet!.type == WalletType.tron,
+            appStore.wallet!.type == WalletType.tron || 
+            appStore.wallet!.type == WalletType.zano,
         outputs = ObservableList<Output>(),
         _settingsStore = appStore.settingsStore,
         fiatFromSettings = appStore.settingsStore.fiatCurrency,
@@ -215,7 +218,14 @@ abstract class SendViewModelBase extends WalletChangeListenerViewModel with Stor
   PendingTransaction? pendingTransaction;
 
   @computed
-  String get balance => wallet.balance[selectedCryptoCurrency]!.formattedAvailableBalance;
+  String get balance {
+    try {
+    return wallet.balance[selectedCryptoCurrency]!.formattedAvailableBalance;
+    } catch (e) {
+      print(e);
+      return 'err';
+    }
+  }
 
   @computed
   bool get isFiatDisabled => balanceViewModel.isFiatDisabled;
@@ -495,6 +505,9 @@ abstract class SendViewModelBase extends WalletChangeListenerViewModel with Stor
             .createSolanaTransactionCredentials(outputs, currency: selectedCryptoCurrency);
       case WalletType.tron:
         return tron!.createTronTransactionCredentials(outputs, currency: selectedCryptoCurrency);
+      case WalletType.zano:
+        return zano!.createZanoTransactionCredentials(
+            outputs: outputs, priority: priority!, currency: selectedCryptoCurrency);
       default:
         throw Exception('Unexpected wallet type: ${wallet.type}');
     }

@@ -1,4 +1,5 @@
 import 'package:cake_wallet/ethereum/ethereum.dart';
+import 'package:cake_wallet/zano/zano.dart';
 import 'package:cake_wallet/bitcoin_cash/bitcoin_cash.dart';
 import 'package:cake_wallet/solana/solana.dart';
 import 'package:cake_wallet/tron/tron.dart';
@@ -83,6 +84,8 @@ abstract class WalletNewVMBase extends WalletCreationVM with Store {
         return solana!.createSolanaNewWalletCredentials(name: name);
       case WalletType.tron:
         return tron!.createTronNewWalletCredentials(name: name);
+      case WalletType.zano:
+        return zano!.createZanoNewWalletCredentials(name: name);
       default:
         throw Exception('Unexpected type: ${type.toString()}');
     }

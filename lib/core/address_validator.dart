@@ -4,18 +4,21 @@ import 'package:cake_wallet/core/validator.dart';
 import 'package:cake_wallet/solana/solana.dart';
 import 'package:cw_core/crypto_currency.dart';
 import 'package:cw_core/erc20_token.dart';
+import 'package:cw_zano/zano_utils.dart';
 
 class AddressValidator extends TextValidator {
-  AddressValidator({required CryptoCurrency type})
+  AddressValidator({required CryptoCurrency type, bool skipZanoAddressValidation = false})
       : super(
             errorMessage: S.current.error_text_address,
             useAdditionalValidation: type == CryptoCurrency.btc
                 ? (String txt) => validateAddress(address: txt, network: BitcoinNetwork.mainnet)
-                : null,
-            pattern: getPattern(type),
+                : type == CryptoCurrency.zano && !skipZanoAddressValidation
+                    ? ZanoUtils.validateAddress
+                    : null,
+            pattern: getPattern(type, skipZanoAddressValidation),
             length: getLength(type));
 
-  static String getPattern(CryptoCurrency type) {
+  static String getPattern(CryptoCurrency type, bool skipZanoAddressValidation) {
     if (type is Erc20Token) {
       return '0x[0-9a-zA-Z]';
     }
@@ -122,6 +125,8 @@ class AddressValidator extends TextValidator {
         return 'D([1-9a-km-zA-HJ-NP-Z]){33}';
       case CryptoCurrency.btcln:
         return '^(lnbc|LNBC)([0-9]{1,}[a-zA-Z0-9]+)';
+      case CryptoCurrency.zano:
+        return skipZanoAddressValidation ? '[0-9a-zA-Z]' : r'$.^'; // always false, we use additional validation then
       default:
         return '[0-9a-zA-Z]';
     }
@@ -258,6 +263,7 @@ class AddressValidator extends TextValidator {
         return [64];
       case CryptoCurrency.btcln:
       case CryptoCurrency.kaspa:
+      case CryptoCurrency.zano:
       default:
         return null;
     }
@@ -298,6 +304,8 @@ class AddressValidator extends TextValidator {
         return '([^0-9a-zA-Z]|^)[1-9A-HJ-NP-Za-km-z]{43,44}([^0-9a-zA-Z]|\$)';
       case CryptoCurrency.trx:
         return '(T|t)[1-9A-HJ-NP-Za-km-z]{33}';
+      case CryptoCurrency.zano:
+        return '[0-9a-zA-Z]{1,100}';
       default:
         if (type.tag == CryptoCurrency.eth.title) {
           return '0x[0-9a-zA-Z]{42}';

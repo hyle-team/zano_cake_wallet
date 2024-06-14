@@ -1,6 +1,7 @@
 import 'package:cake_wallet/bitcoin/bitcoin.dart';
 import 'package:cake_wallet/reactions/wallet_connect.dart';
 import 'package:cake_wallet/store/app_store.dart';
+import 'package:cake_wallet/zano/zano.dart';
 import 'package:cw_core/transaction_direction.dart';
 import 'package:cw_core/transaction_info.dart';
 import 'package:cw_core/wallet_type.dart';
@@ -142,6 +143,12 @@ abstract class WalletKeysViewModelBase with Store {
           StandartListItem(title: S.current.private_key, value: _appStore.wallet!.privateKey!),
       ]);
     }
+
+    if (_appStore.wallet!.type == WalletType.zano) {
+      items.addAll([
+        StandartListItem(title: S.current.wallet_seed, value: _appStore.wallet!.seed!),
+      ]);
+    }
   }
 
   Future<int?> _currentHeight() async {
@@ -178,6 +185,8 @@ abstract class WalletKeysViewModelBase with Store {
         return 'solana-wallet';
       case WalletType.tron:
         return 'tron-wallet';
+      case WalletType.zano:
+        return 'zano-wallet';
       default:
         throw Exception('Unexpected wallet type: ${_appStore.wallet!.toString()}');
     }

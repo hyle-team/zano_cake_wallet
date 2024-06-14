@@ -90,25 +90,15 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
     _useTorOnly = _settingsStore.exchangeStatus == ExchangeApiMode.torOnly;
     _setProviders();
     const excludeDepositCurrencies = [CryptoCurrency.btt];
-    const excludeReceiveCurrencies = [
-      CryptoCurrency.xlm,
-      CryptoCurrency.xrp,
-      CryptoCurrency.bnb,
-      CryptoCurrency.btt
-    ];
+    const excludeReceiveCurrencies = [CryptoCurrency.xlm, CryptoCurrency.xrp, CryptoCurrency.bnb, CryptoCurrency.btt];
     _initialPairBasedOnWallet();
 
-    final Map<String, dynamic> exchangeProvidersSelection =
-        json.decode(sharedPreferences.getString(PreferencesKey.exchangeProvidersSelection) ?? "{}")
-            as Map<String, dynamic>;
+    final Map<String, dynamic> exchangeProvidersSelection = json.decode(sharedPreferences.getString(PreferencesKey.exchangeProvidersSelection) ?? "{}") as Map<String, dynamic>;
 
     /// if the provider is not in the user settings (user's first time or newly added provider)
     /// then use its default value decided by us
-    selectedProviders = ObservableList.of(providerList
-        .where((element) => exchangeProvidersSelection[element.title] == null
-            ? element.isEnabled
-            : (exchangeProvidersSelection[element.title] as bool))
-        .toList());
+    selectedProviders = ObservableList.of(
+        providerList.where((element) => exchangeProvidersSelection[element.title] == null ? element.isEnabled : (exchangeProvidersSelection[element.title] as bool)).toList());
 
     _setAvailableProviders();
     _calculateBestRate();
@@ -124,17 +114,12 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
     final initialProvider = provider;
     provider!.checkIsAvailable().then((bool isAvailable) {
       if (!isAvailable && provider == initialProvider) {
-        provider = providerList.firstWhere((provider) => provider is ChangeNowExchangeProvider,
-            orElse: () => providerList.last);
+        provider = providerList.firstWhere((provider) => provider is ChangeNowExchangeProvider, orElse: () => providerList.last);
         _onPairChange();
       }
     });
-    receiveCurrencies = CryptoCurrency.all
-        .where((cryptoCurrency) => !excludeReceiveCurrencies.contains(cryptoCurrency))
-        .toList();
-    depositCurrencies = CryptoCurrency.all
-        .where((cryptoCurrency) => !excludeDepositCurrencies.contains(cryptoCurrency))
-        .toList();
+    receiveCurrencies = CryptoCurrency.all.where((cryptoCurrency) => !excludeReceiveCurrencies.contains(cryptoCurrency)).toList();
+    depositCurrencies = CryptoCurrency.all.where((cryptoCurrency) => !excludeDepositCurrencies.contains(cryptoCurrency)).toList();
     _defineIsReceiveAmountEditable();
     loadLimits();
     reaction((_) => isFixedRateMode, (Object _) {
@@ -157,8 +142,7 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
         ThorChainExchangeProvider(tradesStore: trades),
         if (FeatureFlag.isExolixEnabled) ExolixExchangeProvider(),
         QuantexExchangeProvider(),
-        TrocadorExchangeProvider(
-            useTorOnly: _useTorOnly, providerStates: _settingsStore.trocadorProviderStates),
+        TrocadorExchangeProvider(useTorOnly: _useTorOnly, providerStates: _settingsStore.trocadorProviderStates),
       ];
 
   @observable
@@ -172,8 +156,7 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
   ///
   /// initialize with descending comparator
   /// since we want largest rate first
-  final SplayTreeMap<double, ExchangeProvider> _sortedAvailableProviders =
-      SplayTreeMap<double, ExchangeProvider>((double a, double b) => b.compareTo(a));
+  final SplayTreeMap<double, ExchangeProvider> _sortedAvailableProviders = SplayTreeMap<double, ExchangeProvider>((double a, double b) => b.compareTo(a));
 
   final List<ExchangeProvider> _tradeAvailableProviders = [];
 
@@ -232,25 +215,20 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
   ObservableList<ExchangeTemplate> get templates => _exchangeTemplateStore.templates;
 
   @computed
-  List<WalletContact> get walletContactsToShow => contactListViewModel.walletContacts
-      .where((element) => element.type == receiveCurrency)
-      .toList();
+  List<WalletContact> get walletContactsToShow => contactListViewModel.walletContacts.where((element) => element.type == receiveCurrency).toList();
 
   @action
   bool checkIfWalletIsAnInternalWallet(String address) {
-    final walletContactList =
-        walletContactsToShow.where((element) => element.address == address).toList();
+    final walletContactList = walletContactsToShow.where((element) => element.address == address).toList();
 
     return walletContactList.isNotEmpty;
   }
 
   @computed
-  bool get shouldDisplayTOTP2FAForExchangesToInternalWallet =>
-      _settingsStore.shouldRequireTOTP2FAForExchangesToInternalWallets;
+  bool get shouldDisplayTOTP2FAForExchangesToInternalWallet => _settingsStore.shouldRequireTOTP2FAForExchangesToInternalWallets;
 
   @computed
-  bool get shouldDisplayTOTP2FAForExchangesToExternalWallet =>
-      _settingsStore.shouldRequireTOTP2FAForExchangesToExternalWallets;
+  bool get shouldDisplayTOTP2FAForExchangesToExternalWallet => _settingsStore.shouldRequireTOTP2FAForExchangesToExternalWallets;
 
   //* Still open to further optimize these checks
   //* It works but can be made better
@@ -276,11 +254,7 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
     return priority;
   }
 
-  bool get hasAllAmount =>
-      (wallet.type == WalletType.bitcoin ||
-          wallet.type == WalletType.litecoin ||
-          wallet.type == WalletType.bitcoinCash) &&
-      depositCurrency == wallet.currency;
+  bool get hasAllAmount => (wallet.type == WalletType.bitcoin || wallet.type == WalletType.litecoin || wallet.type == WalletType.bitcoinCash) && depositCurrency == wallet.currency;
 
   bool get isMoneroWallet => wallet.type == WalletType.monero;
 
@@ -299,6 +273,8 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
         return transactionPriority == bitcoinCash!.getBitcoinCashTransactionPrioritySlow();
       case WalletType.polygon:
         return transactionPriority == polygon!.getPolygonTransactionPrioritySlow();
+      case WalletType.zano:
+        return transactionPriority == monero!.getMoneroTransactionPrioritySlow();
       default:
         return false;
     }
@@ -353,10 +329,7 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
     }
     _cryptoNumberFormat.maximumFractionDigits = depositMaxDigits;
 
-    depositAmount = _cryptoNumberFormat
-        .format(_enteredAmount / _bestRate)
-        .toString()
-        .replaceAll(RegExp('\\,'), '');
+    depositAmount = _cryptoNumberFormat.format(_enteredAmount / _bestRate).toString().replaceAll(RegExp('\\,'), '');
   }
 
   @action
@@ -379,10 +352,7 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
     }
     _cryptoNumberFormat.maximumFractionDigits = receiveMaxDigits;
 
-    receiveAmount = _cryptoNumberFormat
-        .format(_bestRate * _enteredAmount)
-        .toString()
-        .replaceAll(RegExp('\\,'), '');
+    receiveAmount = _cryptoNumberFormat.format(_bestRate * _enteredAmount).toString().replaceAll(RegExp('\\,'), '');
   }
 
   bool checkIfInputMeetsMinOrMaxCondition(String input) {
@@ -400,16 +370,10 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
   Future<void> _calculateBestRate() async {
     final amount = double.tryParse(isFixedRateMode ? receiveAmount : depositAmount) ?? 1;
 
-    final _providers = _tradeAvailableProviders
-        .where((element) => !isFixedRateMode || element.supportsFixedRate)
-        .toList();
+    final _providers = _tradeAvailableProviders.where((element) => !isFixedRateMode || element.supportsFixedRate).toList();
 
-    final result = await Future.wait<double>(_providers.map((element) => element.fetchRate(
-        from: depositCurrency,
-        to: receiveCurrency,
-        amount: amount,
-        isFixedRateMode: isFixedRateMode,
-        isReceiveAmount: isFixedRateMode)));
+    final result = await Future.wait<double>(_providers
+        .map((element) => element.fetchRate(from: depositCurrency, to: receiveCurrency, amount: amount, isFixedRateMode: isFixedRateMode, isReceiveAmount: isFixedRateMode)));
 
     _sortedAvailableProviders.clear();
 
@@ -445,13 +409,11 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
         if (!providersForCurrentPair().contains(provider)) continue;
 
         try {
-          final tempLimits =
-              await provider.fetchLimits(from: from, to: to, isFixedRateMode: isFixedRateMode);
+          final tempLimits = await provider.fetchLimits(from: from, to: to, isFixedRateMode: isFixedRateMode);
 
           if (lowestMin != null && (tempLimits.min ?? -1) < lowestMin) lowestMin = tempLimits.min;
 
-          if (highestMax != null && (tempLimits.max ?? double.maxFinite) > highestMax)
-            highestMax = tempLimits.max;
+          if (highestMax != null && (tempLimits.max ?? double.maxFinite) > highestMax) highestMax = tempLimits.max;
         } catch (e) {
           continue;
         }
@@ -481,9 +443,7 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
       final amount = double.tryParse(depositAmount);
 
       if (limits.min != null && amount != null && amount < limits.min!) {
-        tradeState = TradeIsCreatedFailure(
-            title: S.current.trade_not_created,
-            error: S.current.amount_is_below_minimum_limit(limits.min!.toString()));
+        tradeState = TradeIsCreatedFailure(title: S.current.trade_not_created, error: S.current.amount_is_below_minimum_limit(limits.min!.toString()));
         return;
       }
     }
@@ -545,9 +505,7 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
       }
 
       /// if the code reached here then none of the providers succeeded
-      tradeState = TradeIsCreatedFailure(
-          title: S.current.trade_not_created,
-          error: S.current.none_of_selected_providers_can_exchange);
+      tradeState = TradeIsCreatedFailure(title: S.current.trade_not_created, error: S.current.none_of_selected_providers_can_exchange);
     } on ConcurrentModificationError {
       /// if create trade happened at the exact same time of the scheduled rate update
       /// then delay the create trade a bit and try again
@@ -586,9 +544,7 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
 
   @action
   Future<void> calculateDepositAllAmount() async {
-    if (wallet.type == WalletType.litecoin ||
-        wallet.type == WalletType.bitcoin ||
-        wallet.type == WalletType.bitcoinCash) {
+    if (wallet.type == WalletType.litecoin || wallet.type == WalletType.bitcoin || wallet.type == WalletType.bitcoinCash) {
       final priority = _settingsStore.priority[wallet.type]!;
 
       final amount = await bitcoin!.estimateFakeSendAllTxAmount(wallet, priority);
@@ -618,18 +574,12 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
           depositCurrencyTitle: depositCurrencyTitle,
           receiveCurrencyTitle: receiveCurrencyTitle);
 
-  void removeTemplate({required ExchangeTemplate template}) =>
-      _exchangeTemplateStore.remove(template: template);
+  void removeTemplate({required ExchangeTemplate template}) => _exchangeTemplateStore.remove(template: template);
 
-  List<ExchangeProvider> providersForCurrentPair() =>
-      _providersForPair(from: depositCurrency, to: receiveCurrency);
+  List<ExchangeProvider> providersForCurrentPair() => _providersForPair(from: depositCurrency, to: receiveCurrency);
 
-  List<ExchangeProvider> _providersForPair(
-          {required CryptoCurrency from, required CryptoCurrency to}) =>
-      providerList
-          .where((provider) =>
-              provider.pairList.where((pair) => pair.from == from && pair.to == to).isNotEmpty)
-          .toList();
+  List<ExchangeProvider> _providersForPair({required CryptoCurrency from, required CryptoCurrency to}) =>
+      providerList.where((provider) => provider.pairList.where((pair) => pair.from == from && pair.to == to).isNotEmpty).toList();
 
   void _onPairChange() {
     depositAmount = '';
@@ -682,6 +632,10 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
         depositCurrency = CryptoCurrency.trx;
         receiveCurrency = CryptoCurrency.xmr;
         break;
+      case WalletType.zano:
+        depositCurrency = CryptoCurrency.zano;
+        receiveCurrency = CryptoCurrency.btc;
+        break;
       default:
         break;
     }
@@ -723,9 +677,7 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
     _bestRate = 0;
     _calculateBestRate();
 
-    final Map<String, dynamic> exchangeProvidersSelection =
-        json.decode(sharedPreferences.getString(PreferencesKey.exchangeProvidersSelection) ?? "{}")
-            as Map<String, dynamic>;
+    final Map<String, dynamic> exchangeProvidersSelection = json.decode(sharedPreferences.getString(PreferencesKey.exchangeProvidersSelection) ?? "{}") as Map<String, dynamic>;
 
     for (var provider in providerList) {
       exchangeProvidersSelection[provider.title] = selectedProviders.contains(provider);
@@ -739,15 +691,13 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
 
   bool get isAvailableInSelected {
     final providersForPair = providersForCurrentPair();
-    return selectedProviders
-        .any((element) => element.isAvailable && providersForPair.contains(element));
+    return selectedProviders.any((element) => element.isAvailable && providersForPair.contains(element));
   }
 
   void _setAvailableProviders() {
     _tradeAvailableProviders.clear();
 
-    _tradeAvailableProviders.addAll(
-        selectedProviders.where((provider) => providersForCurrentPair().contains(provider)));
+    _tradeAvailableProviders.addAll(selectedProviders.where((provider) => providersForCurrentPair().contains(provider)));
   }
 
   @action
@@ -771,6 +721,9 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
         break;
       case WalletType.polygon:
         _settingsStore.priority[wallet.type] = polygon!.getDefaultTransactionPriority();
+        break;
+      case WalletType.zano:
+        _settingsStore.priority[wallet.type] = monero!.getMoneroTransactionPriorityAutomatic();
         break;
       default:
         break;
@@ -811,22 +764,19 @@ abstract class ExchangeViewModelBase extends WalletChangeListenerViewModel with 
 
         return CreateTradeResult(
           result: isPayOutAddressEOA,
-          errorMessage:
-              !isPayOutAddressEOA ? S.current.thorchain_contract_address_not_supported : null,
+          errorMessage: !isPayOutAddressEOA ? S.current.thorchain_contract_address_not_supported : null,
         );
       }
 
       // Perform checks for fromWalletAddress
-      final isFromWalletAddressAddressAccordingToPattern =
-          currenciesToCheckPattern.hasMatch(fromWalletAddress);
+      final isFromWalletAddressAddressAccordingToPattern = currenciesToCheckPattern.hasMatch(fromWalletAddress);
 
       if (isFromWalletAddressAddressAccordingToPattern) {
         final isFromWalletAddressEOA = await _isExternallyOwnedAccountAddress(fromWalletAddress);
 
         return CreateTradeResult(
           result: isFromWalletAddressEOA,
-          errorMessage:
-              !isFromWalletAddressEOA ? S.current.thorchain_contract_address_not_supported : null,
+          errorMessage: !isFromWalletAddressEOA ? S.current.thorchain_contract_address_not_supported : null,
         );
       }
     }

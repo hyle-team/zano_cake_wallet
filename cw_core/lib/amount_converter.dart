@@ -1,3 +1,5 @@
+import 'package:decimal/decimal.dart';
+import 'package:decimal/intl.dart';
 import 'package:intl/intl.dart';
 import 'package:cw_core/crypto_currency.dart';
 
@@ -98,6 +100,8 @@ class AmountConverter {
       case CryptoCurrency.xnzd:
       case CryptoCurrency.xusd:
         return _moneroAmountToString(amount);
+      case CryptoCurrency.zano:
+        return _moneroAmountToStringUsingDecimals(amount);
       default:
         return '';
     }
@@ -106,8 +110,15 @@ class AmountConverter {
   static double cryptoAmountToDouble({required num amount, required num divider}) =>
       amount / divider;
 
+  static Decimal cryptoAmountToDecimal({required int amount, required int divider}) =>
+    (Decimal.fromInt(amount) / Decimal.fromInt(divider)).toDecimal();
+
   static String _moneroAmountToString(int amount) => _moneroAmountFormat.format(
       cryptoAmountToDouble(amount: amount, divider: _moneroAmountDivider));
+
+  static String _moneroAmountToStringUsingDecimals(int amount) => _moneroAmountFormat.format(
+    DecimalIntl(cryptoAmountToDecimal(amount: amount, divider: _moneroAmountDivider)));
+  
 
   static double _moneroAmountToDouble(int amount) =>
       cryptoAmountToDouble(amount: amount, divider: _moneroAmountDivider);

@@ -5,6 +5,7 @@ class PreferencesKey {
   static const currentBitcoinElectrumSererIdKey = 'current_node_id_btc';
   static const currentLitecoinElectrumSererIdKey = 'current_node_id_ltc';
   static const currentHavenNodeIdKey = 'current_node_id_xhv';
+  static const currentZanoNodeIdKey = 'current_node_id_zano';
   static const currentEthereumNodeIdKey = 'current_node_id_eth';
   static const currentPolygonNodeIdKey = 'current_node_id_matic';
   static const currentNanoNodeIdKey = 'current_node_id_nano';
@@ -46,6 +47,7 @@ class PreferencesKey {
   static const customBitcoinFeeRate = 'custom_electrum_fee_rate';
   static const silentPaymentsCardDisplay = 'silentPaymentsCardDisplay';
   static const silentPaymentsAlwaysScan = 'silentPaymentsAlwaysScan';
+  static const zanoTransactionPriority = 'current_fee_priority_zano';
   static const shouldShowReceiveWarning = 'should_show_receive_warning';
   static const shouldShowYatPopup = 'should_show_yat_popup';
   static const shouldShowRepWarning = 'should_show_rep_warning';

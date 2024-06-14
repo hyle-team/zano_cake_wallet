@@ -36,6 +36,7 @@ class WalletRestoreFromQRCode {
     'tron': WalletType.tron,
     'tron-wallet': WalletType.tron,
     'tron_wallet': WalletType.tron,
+    'zano-wallet': WalletType.zano,
   };
 
   static bool _containsAssetSpecifier(String code) => _extractWalletType(code) != null;

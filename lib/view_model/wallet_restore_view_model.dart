@@ -7,6 +7,7 @@ import 'package:cake_wallet/bitcoin_cash/bitcoin_cash.dart';
 import 'package:cake_wallet/polygon/polygon.dart';
 import 'package:cake_wallet/solana/solana.dart';
 import 'package:cake_wallet/tron/tron.dart';
+import 'package:cake_wallet/zano/zano.dart';
 import 'package:hive/hive.dart';
 import 'package:mobx/mobx.dart';
 import 'package:cake_wallet/store/app_store.dart';
@@ -136,6 +137,12 @@ abstract class WalletRestoreViewModelBase extends WalletCreationVM with Store {
             mnemonic: seed,
             password: password,
           );
+        case WalletType.zano:
+          return zano!.createZanoRestoreWalletFromSeedCredentials(
+              name: name, 
+              password: password, 
+              height: height, 
+              mnemonic: seed);
         default:
           break;
       }
@@ -168,6 +175,17 @@ abstract class WalletRestoreViewModelBase extends WalletCreationVM with Store {
             password: password,
             language: 'English',
           );
+
+      case WalletType.zano:
+        return zano!.createZanoRestoreWalletFromKeysCredentials(
+            name: name,
+            height: height,
+            spendKey: spendKey!,
+            viewKey: viewKey!,
+            address: address!,
+            password: password,
+            language: 'English');
+      
 
         case WalletType.ethereum:
           return ethereum!.createEthereumRestoreWalletFromPrivateKey(

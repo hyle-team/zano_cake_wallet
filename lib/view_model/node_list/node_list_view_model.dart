@@ -36,9 +36,7 @@ abstract class NodeListViewModelBase with Store {
     return node;
   }
 
-  String getAlertContent(String uri) =>
-      S.current.change_current_node(uri) +
-      '${uri.endsWith('.onion') || uri.contains('.onion:') ? '\n' + S.current.orbot_running_alert : ''}';
+  String getAlertContent(String uri) => S.current.change_current_node(uri) + '${uri.endsWith('.onion') || uri.contains('.onion:') ? '\n' + S.current.orbot_running_alert : ''}';
 
   final ObservableList<Node> nodes;
   final SettingsStore settingsStore;
@@ -84,6 +82,9 @@ abstract class NodeListViewModelBase with Store {
         break;
       case WalletType.tron:
         node = getTronDefaultNode(nodes: _nodeSource)!;
+        break;
+      case WalletType.zano:
+        node = getZanoDefaultNode(nodes: _nodeSource)!;
         break;
       default:
         throw Exception('Unexpected wallet type: ${_appStore.wallet!.type}');
